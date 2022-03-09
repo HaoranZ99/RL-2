@@ -110,7 +110,9 @@ class DQN(object):
 dqn = DQN()
 
 print('\nCollecting experience...')
-for i_episode in range(40000):
+
+sum_r = 0
+for i_episode in range(200000):
     s = env.reset()
     ep_r = 0
     while True:
@@ -126,9 +128,14 @@ for i_episode in range(40000):
         ep_r += r
         if dqn.memory_counter > MEMORY_CAPACITY:
             dqn.learn()
-            if done and i_episode % LOG_EVERY == 0:
-                print('Ep: ', i_episode,
-                      '| Ep_r: ', round(ep_r, 2))
+            if done:
+                if i_episode % 1000 == 0:
+                    print('Ep: ', i_episode,
+                      '| Sum_r: ', sum_r,
+                      '| Epsilon: ', dqn.epsilon)
+                    sum_r = 0
+                else:
+                    sum_r += round(ep_r, 2)
 
         if done:
             break
