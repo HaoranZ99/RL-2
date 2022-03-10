@@ -86,9 +86,12 @@ class IslandEnv(gym.Env):
             Ai being stolen money will (with probability) hit agent, causing agent's life value to be lost.
             - The probability of being hit is 0.7.
             - The life value of being hit is reduced by 8.
+            - 显式地对其惩罚
             """
             money += 5
             hp -= 8
+            reward = -1
+
         else:
             """
             Agent does not do anything will suffer continuous life loss.
