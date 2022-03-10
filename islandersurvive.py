@@ -112,7 +112,7 @@ dqn = DQN()
 print('\nCollecting experience...')
 
 sum_r = 0
-for i_episode in range(200000):
+for i_episode in range(2000000):
     s = env.reset()
     ep_r = 0
     while True:

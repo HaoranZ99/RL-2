@@ -12,6 +12,7 @@ from gym import spaces, logger
 from gym.utils import seeding
 from pyparsing import replaceWith
 
+import logging
 
 class IslandEnv(gym.Env):
     """
@@ -94,9 +95,18 @@ class IslandEnv(gym.Env):
             - 显式地对其惩罚
             """
             hp -= 10
-            # reward = -5
+            reward = -5
 
         self.state = (hp, money)
+
+
+        logging.basicConfig(
+            level=logging.INFO,
+            filename='./logs/3-10-14_45.log',
+            filemode='a',
+            format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s'
+        )
+        logging.info(f"Last action chosen, {action}. Current state: hp, {hp}, money, {money}")
 
         done = bool(
             hp < 0
