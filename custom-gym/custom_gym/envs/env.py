@@ -114,6 +114,55 @@ class IslandEnv(gym.Env):
         )
         return np.array(self.state, dtype=np.float32), reward, done, {}
 
+    # def step(self, action):
+    #     hp, money = self.state
+
+    #     reward = 1
+
+    #     if action == 0:
+    #         """
+    #         Ai may be unhappy after receiving the gift, causing agent's life value loss.
+    #         - First set the possibility of happy as 0.6, no feeling as 0.3, unhappy as 0.1.
+    #         - happy life value increases by 1, unhappy life value decreases by 3.
+
+    #         *Note: If the agent's money is less than the money to buy the gift, the agent can only choose to steal before or do nothing.
+    #         """
+    #         if money < 0:
+    #             hp -= 10
+    #         else:
+    #             money -= 1
+    #             if np.random.uniform() < 0.6:
+    #                 hp += 1
+    #             elif np.random.uniform() < 0.9:
+    #                 pass
+    #             else:
+    #                 hp -= 3
+    #     elif action == 1:
+    #         """
+    #         Ai being stolen money will (with probability) hit agent, causing agent's life value to be lost.
+    #         - The probability of being hit is 0.7.
+    #         - The life value of being hit is reduced by 8.
+    #         """
+    #         money += 5
+    #         if np.random.uniform() < 0.7:
+    #             hp -= 8
+    #     else:
+    #         """
+    #         Agent does not do anything will suffer continuous life loss.
+    #         - Not doing anything reduces life by 10.
+    #         - 显式地对其惩罚
+    #         """
+    #         hp -= 10
+    #         reward -= 10
+
+    #     self.state = (hp, money)
+
+    #     done = bool(
+    #         hp < 0
+    #     )
+
+    #     return np.array(self.state, dtype=np.float32), reward, done, {}
+    
     def reset(
         self
     ):
