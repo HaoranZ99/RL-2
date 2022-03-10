@@ -79,12 +79,8 @@ class IslandEnv(gym.Env):
             """
             """显式地对其奖励"""
             money -= 1
-            if np.random.uniform() < 0.6:
-                hp += 1
-            elif np.random.uniform() < 0.9:
-                pass
-            else:
-                hp -= 3
+            hp += 1
+
         elif action == 1:
             """
             Ai being stolen money will (with probability) hit agent, causing agent's life value to be lost.
@@ -92,8 +88,7 @@ class IslandEnv(gym.Env):
             - The life value of being hit is reduced by 8.
             """
             money += 5
-            if np.random.uniform() < 0.7:
-                hp -= 8
+            hp -= 8
         else:
             """
             Agent does not do anything will suffer continuous life loss.
