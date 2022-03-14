@@ -22,7 +22,7 @@ ENV_A_SHAPE = 0 if isinstance(env.action_space.sample(), int) else env.action_sp
 SAVE_DIR = Path('checkpoints') / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
 SAVE_DIR.mkdir(parents=True)
 
-EPISODES = 800000
+EPISODES = 2000000
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -40,14 +40,14 @@ class Net(nn.Module):
 class DQN(object):
     def __init__(self):
         self.batch_size = 32
-        self.lr = 0.01
+        self.lr = 0.00025
         self.epsilon = 1
         self.epsilon_decay = 0.99999975
         self.epsilon_min = 0.1
         self.gamma = 0.9
-        self.target_replace_iter = 100
-        self.memory_capacity = 2000
-        self.log_every = 1000
+        self.target_replace_iter = 1e4
+        self.memory_capacity = 100000
+        # self.log_every = 1000
         self.save_every = 5e5
 
 

@@ -90,7 +90,6 @@ class IslandEnv(gym.Env):
             """
             money += 5
             hp -= 8
-            reward = -1
 
         else:
             """
@@ -100,7 +99,10 @@ class IslandEnv(gym.Env):
             """
             hp -= 10
             reward = -5
-
+        
+        if hp < 20 or money < 3:
+            reward -= 2
+            
         self.state = (hp, money)
 
         # """
