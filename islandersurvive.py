@@ -47,7 +47,6 @@ class DQN(object):
         self.gamma = 0.9
         self.target_replace_iter = 1e4
         self.memory_capacity = 100000
-        # self.log_every = 1000
         self.save_every = 5e5
 
 
@@ -151,8 +150,6 @@ for i_episode in range(EPISODES):
 
         # 存记忆
         dqn.store_transition(s, a, r, s_)
-
-        # ep_r += r
 
         q, loss = dqn.learn()
 

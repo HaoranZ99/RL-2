@@ -32,12 +32,14 @@ class IslandEnv(gym.Env):
     The observation is a `ndarray` with shape `(2,)` where the elements correspond to the following:
     | Num | Observation           | Min                  | Max                |
     |-----|-----------------------|----------------------|--------------------|
-    | 0   | Islander Hp           | 0                    | Inf                |
-    | 1   | Islander Money        | 0                    | Inf                |
+    | 0   | Islander Hp           | -Inf                 | Inf                |
+    | 1   | Islander Money        | -Inf                 | Inf                |
 
 
     ### Rewards
-    Reward is 1 for every step taken
+    Reward is 1 for every step taken.
+    - If agent chooses to do nothing, hp - 1.
+    - If agent's hp or money is too low, it receives continuous punishment.
 
     ### Starting state
     Islander's hp is set to 100 and its money is set to 10
@@ -45,7 +47,8 @@ class IslandEnv(gym.Env):
     ### Episode Termination
     The episode terminates of one of the following occurs:
 
-    1. Island's hp is below 1.
+    1. Islander's hp is below 0.
+    2. Islander's money is below 0.
     2. Episode length is greater than 200.   
     """
 
@@ -69,34 +72,17 @@ class IslandEnv(gym.Env):
     def step(self, action):
         hp, money = self.state
 
-        reward = 1
-
         if action == 0:
-            """
-            Ai may be unhappy after receiving the gift, causing agent's life value loss.
-            - First set the possibility of happy as 0.6, no feeling as 0.3, unhappy as 0.1.
-            - happy life value increases by 1, unhappy life value decreases by 3.
-            """
-            """显式地对其奖励"""
             money -= 1
             hp += 1
+            reward = 1
 
         elif action == 1:
-            """
-            Ai being stolen money will (with probability) hit agent, causing agent's life value to be lost.
-            - The probability of being hit is 0.7.
-            - The life value of being hit is reduced by 8.
-            - 显式地对其惩罚
-            """
             money += 5
             hp -= 8
+            reward = -1
 
         else:
-            """
-            Agent does not do anything will suffer continuous life loss.
-            - Not doing anything reduces life by 10.
-            - 显式地对其惩罚
-            """
             hp -= 10
             reward = -5
         
@@ -104,17 +90,6 @@ class IslandEnv(gym.Env):
             reward -= 2
             
         self.state = (hp, money)
-
-        # """
-        # Simple logs to log each step
-        # """
-        # logging.basicConfig(
-        #     level=logging.INFO,
-        #     filename='./logs/3-10-14_45.log',
-        #     filemode='a',
-        #     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s'
-        # )
-        # logging.info(f"Last action chosen, {action}. Current state: hp, {hp}, money, {money}")
 
         done = bool(
             hp < 0
@@ -125,7 +100,6 @@ class IslandEnv(gym.Env):
     def reset(
         self
     ):
-        # super().reset()
         self.state = (100.0, 10.0)
         return np.array(self.state, dtype=np.float32)
 
