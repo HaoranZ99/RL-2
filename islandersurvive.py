@@ -47,7 +47,7 @@ class DQN(object):
         self.gamma = 0.9
         self.target_replace_iter = 1e4
         self.memory_capacity = 100000
-        self.save_every = 5e5
+        self.save_every = 5e6
 
 
         # 建立 target net 和 eval net 还有 memory

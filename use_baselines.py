@@ -4,6 +4,7 @@ import custom_gym
 
 from stable_baselines import DQN
 from stable_baselines.common.evaluation import evaluate_policy
+from stable_baselines.sac.policies import MlpPolicy
 
 env = gym.make('Island-v0')
 

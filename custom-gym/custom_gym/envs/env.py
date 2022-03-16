@@ -74,12 +74,18 @@ class IslandEnv(gym.Env):
 
         if action == 0:
             money -= 1
-            hp += 1
+            point = np.random.uniform()
+            if point < 0.6:
+                hp += 1
+            elif point > 0.9:
+                hp -= 3
             reward = 1
 
         elif action == 1:
             money += 5
-            hp -= 8
+            point = np.random.uniform()
+            if point < 0.7:   
+                hp -= 8
             reward = -1
 
         else:
