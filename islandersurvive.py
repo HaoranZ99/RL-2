@@ -19,8 +19,6 @@ N_ACTIONS = env.action_space.n
 N_STATES = env.observation_space.shape[0]
 ENV_A_SHAPE = 0 if isinstance(env.action_space.sample(), int) else env.action_space.sample().shape     # to confirm the shape
 
-SAVE_DIR = Path('checkpoints') / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
-SAVE_DIR.mkdir(parents=True)
 
 EPISODES = 2000000
 class Net(nn.Module):
@@ -38,7 +36,7 @@ class Net(nn.Module):
         return actions_value
 
 class DQN(object):
-    def __init__(self):
+    def __init__(self, save_dir, checkpoint=None):
         self.batch_size = 32
         self.lr = 0.00025
         self.epsilon = 1
@@ -48,6 +46,7 @@ class DQN(object):
         self.target_replace_iter = 1e4
         self.memory_capacity = 100000
         self.save_every = 5e6
+        self.save_dir = save_dir
 
 
         # 建立 target net 和 eval net 还有 memory
@@ -58,6 +57,10 @@ class DQN(object):
         self.memory = np.zeros((self.memory_capacity, N_STATES * 2 + 2))     # initialize memory
 
         self.net = Net().float()
+        # 若选择载入checkpoint
+        if checkpoint:
+            self.load(checkpoint)
+        
         # 选择优化方法和损失函数
         self.optimizer = torch.optim.Adam(self.eval_net.parameters(), lr=self.lr)
         self.loss_func = nn.MSELoss()
@@ -120,7 +123,7 @@ class DQN(object):
     
     # 保存模型
     def save(self):
-        save_path = SAVE_DIR / f"island_net_{int(self.learn_step_counter // self.save_every)}.chkpt"
+        save_path = self.save_dir / f"island_net_{int(self.learn_step_counter // self.save_every)}.chkpt"
         torch.save(
             dict(
                 model=self.net.state_dict(),
@@ -129,41 +132,60 @@ class DQN(object):
             save_path
         )
         print(f"IslandNet saved to {save_path} at step {self.learn_step_counter}")
-
-dqn = DQN()
-
-print('\nCollecting experience...')
-
-# sum_r = 0
-logger = Logger(SAVE_DIR)
-
-for i_episode in range(EPISODES):
-
-    s = env.reset()
-
-    while True:
-
-        a = dqn.choose_action(s)
-
-        # 选动作, 得到环境反馈
-        s_, r, done, _ = env.step(a)
-
-        # 存记忆
-        dqn.store_transition(s, a, r, s_)
-
-        q, loss = dqn.learn()
-
-        logger.log_step(r, loss, q)
-
-        if done:
-            break
-        s = s_ # 将下一个state的值传到下一次循环
     
-    logger.log_episode()
+    # 载入之前训练的模型
+    def load(self, load_path):
+        if not load_path.exists():
+            raise ValueError(f"{load_path} does not exist")
+        ckp = torch.load(load_path, map_location='cpu')
+        exploration_rate = ckp.get('exploration_rate')
+        state_dict = ckp.get('model')
 
-    if i_episode % 20 == 0:
-        logger.record(
-            episode=i_episode,
-            epsilon=dqn.epsilon,
-            step=dqn.learn_step_counter
-        )
+        print(f"Loading model at {load_path} with exploration rate {exploration_rate}")
+        self.net.load_state_dict(state_dict)
+        self.exploration_rate = exploration_rate
+
+def main():
+    SAVE_DIR = Path('checkpoints') / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
+    SAVE_DIR.mkdir(parents=True)
+    
+    dqn = DQN(SAVE_DIR)
+
+    print('\nCollecting experience...')
+
+    # sum_r = 0
+    logger = Logger(SAVE_DIR)
+
+    for i_episode in range(EPISODES):
+
+        s = env.reset()
+
+        while True:
+
+            a = dqn.choose_action(s)
+
+            # 选动作, 得到环境反馈
+            s_, r, done, _ = env.step(a)
+
+            # 存记忆
+            dqn.store_transition(s, a, r, s_)
+
+            q, loss = dqn.learn()
+
+            logger.log_step(r, loss, q)
+
+            if done:
+                break
+            s = s_ # 将下一个state的值传到下一次循环
+        
+        logger.log_episode()
+
+        if i_episode % 20 == 0:
+            logger.record(
+                episode=i_episode,
+                epsilon=dqn.epsilon,
+                step=dqn.learn_step_counter
+            )
+
+if __name__ == '__main__':
+    main()

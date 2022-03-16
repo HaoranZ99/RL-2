@@ -1,5 +1,6 @@
 # Checkpoints files
 checkpoints/
+replays/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
