@@ -24,31 +24,36 @@ class IslandEnv(gym.Env):
     Actions:
     | Num | Action                        |
     |-----|-------------------------------|
-    | 0   | Give gift to another islander |
-    | 1   | Rab another islander          |
+    | 0   | Eat                           |
+    | 1   | Give gift to another islander |
     | 2   | Do nothing                    |
+    | 3   | Chat with another islander    |
+    | 4   | Work                          |
+    | 5   | Rob another islander          |
 
     ### Observation Space
     The observation is a `ndarray` with shape `(2,)` where the elements correspond to the following:
     | Num | Observation           | Min                  | Max                |
     |-----|-----------------------|----------------------|--------------------|
-    | 0   | Islander Hp           | -Inf                 | Inf                |
-    | 1   | Islander Money        | -Inf                 | Inf                |
-
+    | 0   | Islander Health       | -Inf                 | Inf                |
+    | 1   | Islander Reputation   | -Inf                 | Inf                |
+    | 2   | Islander Money        | -Inf                 | Inf                |
 
     ### Rewards
-    Reward is 1 for every step taken.
-    - If agent chooses to do nothing, hp - 1.
-    - If agent's hp or money is too low, it receives continuous punishment.
+    Reward is 1 for every step taken except for action no.2 and no.5.
+    - If agent chooses to do nothing, reward = -5.
+    - If agent chooses to rob, reward = -1.
+    - If agent's health or money is too low, it receives continuous punishment, (reward -= 2).
 
     ### Starting state
-    Islander's hp is set to 100 and its money is set to 10
+    Islander's health is set to 100 and its money is set to 10 and its reputaiton is set to 10.
 
     ### Episode Termination
     The episode terminates of one of the following occurs:
 
-    1. Islander's hp is below 0.
-    2. Islander's money is below 0.
+    1. Islander's health is below 0.
+    2. Islander's reputation is below 0.
+    3. Islander's money is below 0.
     2. Episode length is greater than 200.   
     """
 
@@ -58,47 +63,50 @@ class IslandEnv(gym.Env):
         high = np.array(
             [
                 np.finfo(np.float32).max,
+                np.finfo(np.float32).max,
                 np.finfo(np.float32).max
             ],
             dtype=np.float32,
         )
 
-        self.action_space = spaces.Discrete(3)
+        self.action_space = spaces.Discrete(6)
         self.observation_space = spaces.Box(
             low=-high, high=high, dtype=np.float32)
 
         self.state = None
 
     def step(self, action):
-        hp, money = self.state
+        health, reputation, money = self.state
+        reward = 1
 
-        if action == 0:
+        if action == 0: # Eat
+            health += 10
             money -= 1
-            point = np.random.uniform()
-            if point < 0.6:
-                hp += 1
-            elif point > 0.9:
-                hp -= 3
-            reward = 1
-
-        elif action == 1:
-            money += 5
-            point = np.random.uniform()
-            if point < 0.7:   
-                hp -= 8
-            reward = -1
-
-        else:
-            hp -= 10
+        elif action == 1: # Give gift to another islander
+            reputation += 1
+            money -= 1
+        elif action == 2: # Do nothing
             reward = -5
+        elif action == 3: # Chat with another islander
+            health -= 5
+            reputation += 1
+        elif action == 4: # Work
+            health -= 10
+            money += 2
+        else: # Rob another islander
+            health -= 20
+            reputation -= 5
+            money += 4
+            reward = -1
         
-        if hp < 20 or money < 3:
+        if health < 20 or reputation < 2 or money < 2:
             reward -= 2
             
-        self.state = (hp, money)
+        self.state = (health, reputation, money)
 
         done = bool(
-            hp < 0
+            health < 0
+            or reputation < 0
             or money < 0
         )
         return np.array(self.state, dtype=np.float32), reward, done, {}
@@ -106,7 +114,7 @@ class IslandEnv(gym.Env):
     def reset(
         self
     ):
-        self.state = (100.0, 10.0)
+        self.state = (100.0, 10.0, 10.0)
         return np.array(self.state, dtype=np.float32)
 
     def render(self, mode="human"):
@@ -114,3 +122,7 @@ class IslandEnv(gym.Env):
 
     def close(self):
         pass
+
+    def get_action_meanings(self):
+        return {0: "Eat", 1: "Give gift to another islander", 2: "Do nothing", 3: "Chat with another islander", 4: "Work",
+        5: "Rob another islander"}

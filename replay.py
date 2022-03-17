@@ -31,10 +31,15 @@ for e in range(episodes):
         # 选动作, 得到环境反馈
         s_, r, done, _ = env.step(a)
 
+        # display step
+        logger.replay_log_step(save_dir, 'replay_log', s_, a)
+
         # 存记忆
         dqn.store_transition(s, a, r, s_)
 
-        logger.log_step(r, None, None)
+        q, loss = dqn.learn()
+
+        logger.log_step(r, loss, q)
 
         if done:
             break

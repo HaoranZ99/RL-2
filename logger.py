@@ -104,4 +104,9 @@ class Logger():
             plt.plot(getattr(self, f"moving_avg_{metric}"))
             plt.savefig(getattr(self, f"{metric}_plot"))
             plt.clf()
-
+    
+    def replay_log_step(self, _save_dir, _save_log, state, action):
+        with open(_save_dir / _save_log, "a") as f:
+            f.write(
+                f"The agent take {action}, the state is {state}\n"
+            )
