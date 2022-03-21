@@ -12,7 +12,7 @@ env.reset()
 save_dir = Path('replays') / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
 save_dir.mkdir(parents=True)
 
-checkpoint = Path('island_net_5.chkpt')
+checkpoint = Path('island_net_2.chkpt')
 dqn = DQN(save_dir=save_dir, checkpoint=checkpoint)
 dqn.epsilon = dqn.epsilon_min
 
@@ -37,9 +37,11 @@ for e in range(episodes):
         # 存记忆
         dqn.store_transition(s, a, r, s_)
 
-        q, loss = dqn.learn()
+        # q, loss = dqn.learn()
 
-        logger.log_step(r, loss, q)
+        # logger.log_step(r, loss, q)
+
+        logger.log_step(r, None, None)
 
         if done:
             break
