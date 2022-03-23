@@ -81,26 +81,25 @@ class IslandEnv(gym.Env):
 
         if action == 0: # Eat
             health += 10
-            money -= 15
+            money -= 1
         elif action == 1: # Give gift to another islander
-            reputation += 10
-            money -= 15
+            reputation += 1
+            money -= 1
         elif action == 2: # Do nothing
-            health -= 10
             reward = -5
         elif action == 3: # Chat with another islander
-            health -= 15
-            reputation += 10
+            health -= 5
+            reputation += 1
         elif action == 4: # Work
-            health -= 15
-            money += 10
+            health -= 10
+            money += 2
         else: # Rob another islander
             health -= 20
-            reputation -= 20
-            money += 30
+            reputation -= 5
+            money += 4
             reward = -1
         
-        if health < 20 or reputation < 20 or money < 20:
+        if health < 20 or reputation < 2 or money < 2:
             reward -= 2
             
         self.state = (health, reputation, money)
@@ -115,7 +114,7 @@ class IslandEnv(gym.Env):
     def reset(
         self
     ):
-        self.state = (100.0, 100.0, 100.0)
+        self.state = (100.0, 10.0, 10.0)
         return np.array(self.state, dtype=np.float32)
 
     def render(self, mode="human"):
@@ -123,7 +122,3 @@ class IslandEnv(gym.Env):
 
     def close(self):
         pass
-
-    def get_action_meanings(self):
-        return {0: "Eat", 1: "Give gift to another islander", 2: "Do nothing", 3: "Chat with another islander", 4: "Work",
-        5: "Rob another islander"}

@@ -12,7 +12,7 @@ env.reset()
 save_dir = Path('replays') / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
 save_dir.mkdir(parents=True)
 
-checkpoint = Path('checkpoints/2022-03-22T19-00-12/island_net_5.chkpt')
+checkpoint = Path('checkpoints/2022-03-23T15-59-58/island_net_1.chkpt')
 dqn = DQN(save_dir=save_dir, checkpoint=checkpoint)
 dqn.epsilon = dqn.epsilon_min
 
