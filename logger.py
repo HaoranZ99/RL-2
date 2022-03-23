@@ -108,5 +108,15 @@ class Logger():
     def replay_log_step(self, _save_dir, _save_log, state, action):
         with open(_save_dir / _save_log, "a") as f:
             f.write(
-                f"The agent take {action}, the state is {state}\n"
+                f"The agent take action {action}, the state is {state}.\n"
             )
+
+    def replay_log(self, _save_dir, _save_log, msg):
+        with open(_save_dir / _save_log, "a") as f:
+            f.write(
+                f"{msg}\n"
+            )
+    
+    def get_action_meanings(self):
+        return {0: "Eat", 1: "Give gift to another islander", 2: "Do nothing", 3: "Chat with another islander", 4: "Work",
+        5: "Rob another islander"}

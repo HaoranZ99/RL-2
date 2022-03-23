@@ -56,7 +56,6 @@ class DQN(object):
         self.memory_counter = 0                                         # for storing memory
         self.memory = np.zeros((self.memory_capacity, N_STATES * 2 + 2))     # initialize memory
 
-        self.net = Net().float()
         # 若选择载入checkpoint
         if checkpoint:
             self.load(checkpoint)
@@ -126,7 +125,8 @@ class DQN(object):
         save_path = self.save_dir / f"island_net_{int(self.learn_step_counter // self.save_every)}.chkpt"
         torch.save(
             dict(
-                model=self.net.state_dict(),
+                model_eval_net=self.eval_net.state_dict(),
+                model_target_net=self.target_net.state_dict(),
                 exploration_rate=self.epsilon
             ),
             save_path
@@ -139,10 +139,12 @@ class DQN(object):
             raise ValueError(f"{load_path} does not exist")
         ckp = torch.load(load_path, map_location='cpu')
         exploration_rate = ckp.get('exploration_rate')
-        state_dict = ckp.get('model')
+        eval_net_state_dict = ckp.get('model_eval_net')
+        target_net_state_dict = ckp.get('model_target_net')
 
         print(f"Loading model at {load_path} with exploration rate {exploration_rate}")
-        self.net.load_state_dict(state_dict)
+        self.eval_net.load_state_dict(eval_net_state_dict)
+        self.target_net.load_state_dict(target_net_state_dict)
         self.exploration_rate = exploration_rate
 
 def main():
