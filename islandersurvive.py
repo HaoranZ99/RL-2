@@ -45,7 +45,7 @@ class DQN(object):
         self.gamma = 0.9
         self.target_replace_iter = 1e4
         self.memory_capacity = 100000
-        self.save_every = 5e6
+        self.save_every = 1e6
         self.save_dir = save_dir
 
 
