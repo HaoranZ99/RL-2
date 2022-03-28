@@ -12,7 +12,7 @@ env.reset()
 save_dir = Path('replays') / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
 save_dir.mkdir(parents=True)
 
-checkpoint = Path('checkpoints/2022-03-23T15-59-58/island_net_1.chkpt')
+checkpoint = Path('checkpoints/3-28-addicted/island_net_2.chkpt')
 dqn = DQN(save_dir=save_dir, checkpoint=checkpoint)
 dqn.epsilon = dqn.epsilon_min
 
@@ -36,7 +36,7 @@ for e in range(episodes):
         logger.replay_log_step(save_dir, 'replay_log', s_, dict.get(a))
 
         # 存记忆
-        dqn.store_transition(s, a, r, s_)
+        # dqn.store_transition(s, a, r, s_)
 
         logger.log_step(r, None, None)
 

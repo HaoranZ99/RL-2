@@ -147,6 +147,21 @@ class DQN(object):
         self.target_net.load_state_dict(target_net_state_dict)
         self.exploration_rate = exploration_rate
 
+'''
+Actions:
+| 0   | Eat        |
+| 1   | Give gift  |
+| 2   | Do nothing |
+| 3   | Chat       |
+| 4   | Work       |
+| 5   | Rob        |
+For ordinary people, REWARD_OFFSIDE = {0 : 0.0, 1 : 0.0, 2 : 0.0, 3 : 0.0, 4 : 0.0, 5 : 0.0}
+For addicted people, REWARD_OFFSIDE = {0 : -2.0, 1 : -2.0, 2 : 2.0, 3 : -2.0, 4 : -2.0, 5 : 2.0}
+For TF Boys, REWARD_OFFSIDE = {0 : 2.0, 1 : 2.0, 2 : -2.0, 3 : 2.0, 4 : 2.0, 5 : -2.0}
+'''
+# TF Boys
+REWARD_OFFSIDE = {0 : 2.0, 1 : 2.0, 2 : -2.0, 3 : 2.0, 4 : 2.0, 5 : -2.0}
+
 def main():
     SAVE_DIR = Path('checkpoints') / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
     SAVE_DIR.mkdir(parents=True)
@@ -168,6 +183,13 @@ def main():
 
             # 选动作, 得到环境反馈
             s_, r, done, _ = env.step(a)
+
+            # Revise reward
+            # 生成一个均值为revised reward，标准差为0.5 * reward的f服从正态分布的随机值
+            # mu = r + (-1.0)
+            mu = r + REWARD_OFFSIDE.get(a)
+            sigma = abs(mu * 0.5) # To make sure sigma is not less than 0
+            r = np.random.normal(loc=mu, scale=sigma)
 
             # 存记忆
             dqn.store_transition(s, a, r, s_)
