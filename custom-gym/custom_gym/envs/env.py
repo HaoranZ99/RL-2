@@ -54,7 +54,7 @@ class IslandEnv(gym.Env):
     1. Islander's health is below 0.
     2. Islander's reputation is below 0.
     3. Islander's money is below 0.
-    2. Episode length is greater than 200.   
+    2. Episode length is greater than 500.   
     """
 
     # No metadata needed.
