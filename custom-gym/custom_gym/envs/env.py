@@ -2,10 +2,12 @@
 Simulation of a simple environment for the islanders to interact.
 """
 import math
+import re
 from time import sleep
 from typing import Optional, Union
 
 import numpy as np
+from numpy import random as rand
 
 import gym
 from gym import spaces, logger
@@ -13,6 +15,8 @@ from gym.utils import seeding
 from pyparsing import replaceWith
 
 import logging
+
+from torch import rand
 
 class IslandEnv(gym.Env):
     """
@@ -22,28 +26,33 @@ class IslandEnv(gym.Env):
     ### Action Space
     The agent take a 1-element vector for actions.
     Actions:
-    | Num | Action                        |
-    |-----|-------------------------------|
-    | 0   | Eat                           |
-    | 1   | Give gift to another islander |
-    | 2   | Do nothing                    |
-    | 3   | Chat with another islander    |
-    | 4   | Work                          |
-    | 5   | Rob another islander          |
+    | Num  | Action              | Effects on States               |
+    |------|---------------------|---------------------------------|
+    |  0   | Eat                 | Money and Health                |
+    |  1   | Send gift           | Money and Reputation            |
+    |  2   | Idle                | /                               |
+    |  3   | Chat                | Health and Reputation           |
+    |  4   | Work                | Health and Money                |
+    |  5   | Comments on Moments | Health and Reputation           |
+    |  6   | Like on Moments     | Health and Reputation           |
+    |  7   | Live room           | Health and Money and Reputation |
+    |  8   | Play games          | Health and Money and Reputation |
+    |  9   | Disco dancing       | Health and Money and Reputation |
+    | 10   | Pray                | Health and Money                |
 
     ### Observation Space
     The observation is a `ndarray` with shape `(2,)` where the elements correspond to the following:
-    | Num | Observation           | Min                  | Max                |
-    |-----|-----------------------|----------------------|--------------------|
-    | 0   | Islander Health       | -Inf                 | Inf                |
-    | 1   | Islander Reputation   | -Inf                 | Inf                |
-    | 2   | Islander Money        | -Inf                 | Inf                |
+    | Num | Observation         | Min                  | Max                |
+    |-----|---------------------|----------------------|--------------------|
+    | 0   | Islander Health     | -Inf                 | Inf                |
+    | 1   | Islander Reputation | -Inf                 | Inf                |
+    | 2   | Islander Money      | -Inf                 | Inf                |
 
     ### Rewards
-    Reward is 1 for every step taken except for action no.2 and no.5.
+    Reward is 1 for every step taken except for action no.2.
     - If agent chooses to do nothing, reward = -5.
-    - If agent chooses to rob, reward = -1.
-    - If agent's health or money is too low, it receives continuous punishment, (reward -= 2).
+    - If agent chooses one action and if state is unhealthy, reward = -10.
+    - If agent's health or reputation or money is too low, it receives continuous punishment, (reward -= 2).
 
     ### Starting state
     Islander's health is set to 100 and its money is set to 10 and its reputaiton is set to 10.
@@ -69,35 +78,101 @@ class IslandEnv(gym.Env):
             dtype=np.float32,
         )
 
-        self.action_space = spaces.Discrete(6)
+        self.action_space = spaces.Discrete(11)
         self.observation_space = spaces.Box(
             low=-high, high=high, dtype=np.float32)
 
         self.state = None
 
+    def _isDone(self, health=0, reputation=0, money=0):
+        return bool(
+            health < 0
+            or reputation < 0
+            or money < 0
+        )
+    
     def step(self, action):
         health, reputation, money = self.state
         reward = 1
 
         if action == 0: # Eat
-            health += 10
             money -= 1
-        elif action == 1: # Give gift to another islander
-            reputation += 1
+            if self._isDone(money=money):
+                reward = -10
+            else:
+                health += 10
+        elif action == 1: # Send gift
             money -= 1
-        elif action == 2: # Do nothing
+            if self._isDone(money=money):
+                reward = -10
+            else:            
+                reputation += 1
+        elif action == 2: # Idle
             reward = -5
-        elif action == 3: # Chat with another islander
+        elif action == 3: # Chat
             health -= 5
-            reputation += 1
+            if self._isDone(health=health):
+                reward = -10
+            else:
+                reputation += 1
         elif action == 4: # Work
             health -= 10
-            money += 2
-        else: # Rob another islander
+            if self._isDone(health=health):
+                reward = -10
+            else:
+                money += 2
+        elif action == 5: # Comments on Moments
+            health -= 5
+            if self._isDone(health=health):
+                reward = -10
+            else:
+                if rand.uniform() > 0.7:
+                    reputation += 2
+                else:
+                    reputation -= 2
+        elif action == 6: # Like on Moments
+            health -= 5
+            if self._isDone(health=health):
+                reward = -10
+            else:
+                reputation += 1
+        elif action == 7: # Live room
             health -= 20
-            reputation -= 5
-            money += 4
-            reward = -1
+            money -= 1
+            if self._isDone(health=health, money=money):
+                reward = -10
+            else:
+                reputation += 2
+                money += 2
+        elif action == 8: # Play games
+            health -= 10
+            money -= 1
+            if self._isDone(health=health, money=money):
+                reward = -10
+            else:
+                if rand.uniform() > 0.5:
+                    reputation += 2
+                    money += 2
+                else:
+                    reputation -= 2
+                    money -= 2
+        elif action == 9: # Disco dancing
+            health -= 10
+            money -= 1
+            if self._isDone(health=health, money=money):
+                reward -= 10
+            else:
+                reputation += 1
+                health += 20
+        else: # Pray
+            health -= 5
+            if self._isDone(health=health):
+                reward = -10
+            else:
+                if rand.uniform() > 0.7:
+                    money += 1
+                else:
+                    health -= 20
         
         if health < 20 or reputation < 2 or money < 2:
             reward -= 2
