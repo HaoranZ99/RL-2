@@ -7,7 +7,6 @@ from time import sleep
 from typing import Optional, Union
 
 import numpy as np
-from numpy import random as rand
 
 import gym
 from gym import spaces, logger
@@ -93,6 +92,7 @@ class IslandEnv(gym.Env):
     
     def step(self, action):
         health, reputation, money = self.state
+        
         reward = 1
 
         if action == 0: # Eat
@@ -126,7 +126,7 @@ class IslandEnv(gym.Env):
             if self._isDone(health=health):
                 reward = -10
             else:
-                if rand.uniform() > 0.7:
+                if np.random.uniform() > 0.7:
                     reputation += 2
                 else:
                     reputation -= 2
@@ -142,7 +142,7 @@ class IslandEnv(gym.Env):
             if self._isDone(health=health, money=money):
                 reward = -10
             else:
-                reputation += 2
+                reputation += 1
                 money += 2
         elif action == 8: # Play games
             health -= 10
@@ -150,7 +150,7 @@ class IslandEnv(gym.Env):
             if self._isDone(health=health, money=money):
                 reward = -10
             else:
-                if rand.uniform() > 0.5:
+                if np.random.uniform() > 0.5:
                     reputation += 2
                     money += 2
                 else:
@@ -160,7 +160,7 @@ class IslandEnv(gym.Env):
             health -= 10
             money -= 1
             if self._isDone(health=health, money=money):
-                reward -= 10
+                reward = -10
             else:
                 reputation += 1
                 health += 20
@@ -169,27 +169,40 @@ class IslandEnv(gym.Env):
             if self._isDone(health=health):
                 reward = -10
             else:
-                if rand.uniform() > 0.7:
+                if np.random.uniform() > 0.7:
                     money += 1
                 else:
                     health -= 20
         
-        if health < 20 or reputation < 2 or money < 2:
-            reward -= 2
+        if health < 40 or reputation < 4 or money < 4:
+            reward -= 10
             
         self.state = (health, reputation, money)
+
+        '''
+        Revise reward
+        Introduce normal randomness.
+        For moderate people, REWARD_OFFSIDE = {0 : 0.0, 1 : 0.0, 2 : 0.0, 3 : 0.0, 4 : 0.0, 5 : 0.0, 6 : 0.0, 7 : 0.0, 8 : 0.0, 9 : 0.0, 10 : 0.0}
+        For conservative people, REWARD_OFFSIDE = {0 : 1.0, 1 : 1.0, 2 : 1.0, 3 : 1.0, 4 : 1.0, 5 : -1.0, 6 : 1.0, 7 : 1.0, 8 : -1.0, 9 : 1.0, 10 : -1.0}
+        For aggressive people, REWARD_OFFSIDE = {0 : -1.0, 1 : -1.0, 2 : -1.0, 3 : -1.0, 4 : -1.0, 5 : 1.0, 6 : -1.0, 7 : -1.0, 8 : 1.0, 9 : -1.0, 10 : 1.0}
+        '''
+        REWARD_OFFSIDE = {0 : 0.0, 1 : 0.0, 2 : 0.0, 3 : 0.0, 4 : 0.0, 5 : 0.0, 6 : 0.0, 7 : 0.0, 8 : 0.0, 9 : 0.0, 10 : 0.0}
+        mu = reward + REWARD_OFFSIDE.get(action)
+        sigma = abs(mu * 0.5) # To make sure sigma is not less than 0
+        reward = np.random.normal(loc=mu, scale=sigma)
 
         done = bool(
             health < 0
             or reputation < 0
             or money < 0
         )
+
         return np.array(self.state, dtype=np.float32), reward, done, {}
     
     def reset(
         self
     ):
-        self.state = (100.0, 10.0, 10.0)
+        self.state = (200.0, 20.0, 20.0)
         return np.array(self.state, dtype=np.float32)
 
     def render(self, mode="human"):

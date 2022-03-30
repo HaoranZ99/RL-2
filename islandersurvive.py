@@ -45,7 +45,7 @@ class DQN(object):
         self.gamma = 0.9
         self.target_replace_iter = 1e4
         self.memory_capacity = 100000
-        self.save_every = 1e6
+        self.save_every = 2e5
         self.save_dir = save_dir
 
 
@@ -160,7 +160,7 @@ For addicted people, REWARD_OFFSIDE = {0 : -2.0, 1 : -2.0, 2 : 2.0, 3 : -2.0, 4 
 For TF Boys, REWARD_OFFSIDE = {0 : 2.0, 1 : 2.0, 2 : -2.0, 3 : 2.0, 4 : 2.0, 5 : -2.0}
 '''
 # TF Boys
-REWARD_OFFSIDE = {0 : 2.0, 1 : 2.0, 2 : -2.0, 3 : 2.0, 4 : 2.0, 5 : -2.0}
+# REWARD_OFFSIDE = {0 : 2.0, 1 : 2.0, 2 : -2.0, 3 : 2.0, 4 : 2.0, 5 : -2.0}
 
 def main():
     SAVE_DIR = Path('checkpoints') / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
@@ -186,10 +186,10 @@ def main():
 
             # Revise reward
             # 生成一个均值为revised reward，标准差为0.5 * reward的f服从正态分布的随机值
-            # mu = r + (-1.0)
-            mu = r + REWARD_OFFSIDE.get(a)
-            sigma = abs(mu * 0.5) # To make sure sigma is not less than 0
-            r = np.random.normal(loc=mu, scale=sigma)
+            # mu = r + (0.0)
+            # # mu = r + REWARD_OFFSIDE.get(a)
+            # sigma = abs(mu * 0.5) # To make sure sigma is not less than 0
+            # r = np.random.normal(loc=mu, scale=sigma)
 
             # 存记忆
             dqn.store_transition(s, a, r, s_)

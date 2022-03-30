@@ -118,5 +118,5 @@ class Logger():
             )
     
     def get_action_meanings(self):
-        return {0: "Eat", 1: "Give gift to another islander", 2: "Do nothing", 3: "Chat with another islander", 4: "Work",
-        5: "Rob another islander"}
+        return {0: "Eat", 1: "Send gift", 2: "Idle", 3: "Chat", 4: "Work", 5: "Comments on Moments", 
+        6:"Like on Moments", 7: "Live room", 8: "Play games", 9: "Disco dancing", 10: "Pray"}
