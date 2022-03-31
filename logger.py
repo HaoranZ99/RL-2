@@ -117,6 +117,11 @@ class Logger():
                 f"{msg}\n"
             )
     
+    def repaly_brief(self, _save_dir, _save_log, dict, step):
+        with open(_save_dir / _save_log, "a") as f:
+            for key, val in dict.items():
+                f.write(f"{key} : {val / step * 100:10.3f}%.\n")
+    
     def get_action_meanings(self):
         return {0: "Eat", 1: "Send gift", 2: "Idle", 3: "Chat", 4: "Work", 5: "Comments on Moments", 
         6:"Like on Moments", 7: "Live room", 8: "Play games", 9: "Disco dancing", 10: "Pray"}
