@@ -110,7 +110,7 @@ class IslandEnv(gym.Env):
         elif action == 2: # Idle
             reward = -5
         elif action == 3: # Chat
-            health -= 5
+            health -= 10
             if self._isDone(health=health):
                 reward = -10
             else:
@@ -120,7 +120,7 @@ class IslandEnv(gym.Env):
             if self._isDone(health=health):
                 reward = -10
             else:
-                money += 2
+                money += 1
         elif action == 5: # Comments on Moments
             health -= 5
             if self._isDone(health=health):
@@ -137,33 +137,30 @@ class IslandEnv(gym.Env):
             else:
                 reputation += 1
         elif action == 7: # Live room
-            health -= 20
+            health -= 5
             money -= 1
             if self._isDone(health=health, money=money):
                 reward = -10
             else:
                 reputation += 1
-                money += 2
         elif action == 8: # Play games
             health -= 10
-            money -= 1
             if self._isDone(health=health, money=money):
                 reward = -10
             else:
                 if np.random.uniform() > 0.5:
                     reputation += 2
-                    money += 2
+                    money += 1
                 else:
                     reputation -= 2
-                    money -= 2
+                    money -= 1
         elif action == 9: # Disco dancing
             health -= 10
             money -= 1
             if self._isDone(health=health, money=money):
                 reward = -10
             else:
-                reputation += 1
-                health += 20
+                reputation += 2
         else: # Pray
             health -= 5
             if self._isDone(health=health):
@@ -188,7 +185,7 @@ class IslandEnv(gym.Env):
         '''
         REWARD_OFFSIDE = {0 : 0.0, 1 : 0.0, 2 : 0.0, 3 : 0.0, 4 : 0.0, 5 : 0.0, 6 : 0.0, 7 : 0.0, 8 : 0.0, 9 : 0.0, 10 : 0.0}
         mu = reward + REWARD_OFFSIDE.get(action)
-        sigma = abs(mu * 0.5) # To make sure sigma is not less than 0
+        sigma = 2.0
         reward = np.random.normal(loc=mu, scale=sigma)
 
         done = bool(

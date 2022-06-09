@@ -8,11 +8,17 @@ from logger import Logger
 from islandersurvive import DQN
 env = gym.make('Island-v0')
 
+import sys
+
 env.reset()
 save_dir = Path('replays') / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
 save_dir.mkdir(parents=True)
 
-checkpoint = Path('checkpoints/3-30-aggressive/island_net_7.chkpt')
+# checkpoint = Path('checkpoints/2022-04-06T11-34-17/island_net_20.chkpt')
+if len(sys.argv) < 2:
+    exit(1)
+checkpoint = Path(sys.argv[1])
+
 dqn = DQN(save_dir=save_dir, checkpoint=checkpoint)
 dqn.epsilon = dqn.epsilon_min
 

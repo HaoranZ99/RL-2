@@ -169,13 +169,6 @@ def main():
             # 选动作, 得到环境反馈
             s_, r, done, _ = env.step(a)
 
-            # Revise reward
-            # 生成一个均值为revised reward，标准差为0.5 * reward的服从正态分布的随机值
-            # mu = r + (0.0)
-            # # mu = r + REWARD_OFFSIDE.get(a)
-            # sigma = abs(mu * 0.5) # To make sure sigma is not less than 0
-            # r = np.random.normal(loc=mu, scale=sigma)
-
             # 存记忆
             dqn.store_transition(s, a, r, s_)
 
